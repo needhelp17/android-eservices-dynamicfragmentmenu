@@ -23,6 +23,7 @@ public class FavoritesFragment extends Fragment {
     private NavigationInterface navigationInterface;
     private Integer currentCounter;
     private Button addButton;
+    private int restore=0;
     private Button removeButton;
     private TextView counterTextView;
 
@@ -54,19 +55,30 @@ public class FavoritesFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         System.out.println("On activity created " + this);
-        setupButtons();
 
+        if (savedInstanceState != null) {
+            currentCounter = savedInstanceState.getInt("counter");
+        }else {
+            currentCounter = 4;
+        }
+        setupButtons();
         //TODO if available, restore the state of the current counter
         //TODO if there is no value to restore, set the counter to default value 4
         //TODO finally call refreshCounter to update the display
 
+    }
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putInt("counter", currentCounter);
     }
 
     private void setupButtons() {
         addButton = rootView.findViewById(R.id.add_button);
         removeButton = rootView.findViewById(R.id.remove_button);
         counterTextView = rootView.findViewById(R.id.counter_textview);
-
+        counterTextView.setText(Integer.toString(currentCounter));
+        refreshCounter();
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -10,8 +10,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.navigation.NavigationView;
 
@@ -31,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements NavigationInterfa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setupNavigationElements();
+
+
 
 
         //TODO Restore instance state
@@ -55,28 +60,32 @@ public class MainActivity extends AppCompatActivity implements NavigationInterfa
         toolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
 
+        FavoritesFragment f = new FavoritesFragment();
+        SelectedFragment f2 = new SelectedFragment();
+
         drawerLayout = findViewById(R.id.drawer_layout);
         drawerLayout.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
 
         fragmentArray = new SparseArray<>(3);
-
+        fragmentArray.append(0,f2);
+        fragmentArray.append(1,f);
         navigationView = findViewById(R.id.navigation);
         navigationView.inflateHeaderView(R.layout.navigation_header);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                //TODO react according to the selected item menu
-                //We need to display the right fragment according to the menu item selection.
-                //Any created fragment must be cached so it is only created once.
-                //You need to implement this "cache" manually : when you create a fragment based on the menu item,
-                //store it the way you prefer, so when you select this menu item later, you first check if the fragment already exists
-                //and then you use it. If the fragment doesn't exist (it is not cached then) you get an instance of it and store it in the cache.
-
-
-                //TODO when we select logoff, I want the Activity to be closed (and so the Application, as it has only one activity)
-
-                //check in the doc what this boolean means and use it the right way ...
+                switch(menuItem.getItemId()){
+                    case R.id.logoff:
+                        logoff();
+                        return true;
+                    case R.id.favorites:
+                        replaceFragment(fragmentArray.get(1));
+                        return true;
+                    case R.id.list:
+                        replaceFragment(fragmentArray.get(0));
+                        return true;
+                }
                 return false;
             }
         });
@@ -84,10 +93,16 @@ public class MainActivity extends AppCompatActivity implements NavigationInterfa
 
 
     private void replaceFragment(Fragment newFragment) {
-        //TODO replace fragment inside R.id.fragment_container using a FragmentTransaction
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, newFragment);
+        currentFragment = newFragment;
+        transaction.addToBackStack(null);
+        transaction.commit();
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
     }
 
-    private void logoff() {
+    private void logoff(){
         finish();
     }
 
